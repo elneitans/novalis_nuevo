@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 
-from .routers import auth, projects, llama  # Lo crearemos más adelante
+from .routers import auth, projects
 
 Base.metadata.create_all(bind=engine)
 
