@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 
-from .routers import auth, projects
+from .routers import auth, projects, deepseek
 
 Base.metadata.create_all(bind=engine)
 
@@ -25,3 +25,4 @@ def read_root():
 # Incluir las rutas de los routers
 app.include_router(auth.router)
 app.include_router(projects.router)
+app.include_router(deepseek.router)

@@ -83,8 +83,8 @@ const ProjectEdit = () => {
     setChatInput('');
 
     try {
-      // Llamada a nuestro endpoint local: POST /llama/chat
-      const response = await axios.post('http://127.0.0.1:8000/llama/chat', {
+      // Llamada a nuestro endpoint local: POST /deepseek/chat
+      const response = await axios.post('http://127.0.0.1:8000/deepseek/chat', {
         prompt: userMessage.text,
         max_length: 100,
         do_sample: true,
@@ -92,7 +92,7 @@ const ProjectEdit = () => {
       });
       const assistantMessage = {
         role: 'assistant',
-        text: response.data.generated_text,
+        text: response.data.content,
       };
 
       // Agregamos la respuesta del modelo al historial
@@ -139,7 +139,7 @@ const ProjectEdit = () => {
 
       {/* SECCIÓN DERECHA: Chat con LLaMa */}
       <div style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column' }}>
-        <h2>Chat con LLaMa</h2>
+        <h2>Chat con DeepSeek</h2>
 
         {/* HISTORIAL DE MENSAJES */}
         <div
@@ -157,7 +157,7 @@ const ProjectEdit = () => {
                 {msg.role === 'user'
                   ? 'Tú'
                   : msg.role === 'assistant'
-                  ? 'LLaMa'
+                  ? 'Deepseek'
                   : 'Sistema'}
                 :
               </strong>{' '}
