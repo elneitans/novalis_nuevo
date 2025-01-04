@@ -13,11 +13,13 @@ const ProjectEdit = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [message, setMessage] = useState('');
+  const [leftWidth, setLeftWidth] = useState(300);
+  const [isDragging, setIsDragging] = useState(false);
 
   // States para el chat
   const [messages, setMessages] = useState([
     // Ejemplo de mensaje inicial
-    { role: 'system', text: 'Bienvenido al chat de sugerencias (aún no funcional).' },
+    { role: 'system', text: '¡Habla con tu mentor literario!' },
   ]);
   const [chatInput, setChatInput] = useState('');
 
@@ -46,6 +48,29 @@ const ProjectEdit = () => {
     fetchProject();
   }, [id]);
 
+  useEffect(() => {
+    // Cuando el usuario está arrastrando, conecta los eventos globales
+    const handleDrag = (e) => {
+      if (!isDragging) return;
+      const newLeftWidth = e.clientX;
+      if (newLeftWidth > 200 && newLeftWidth < window.innerWidth - 200) {
+        setLeftWidth(newLeftWidth);
+      }
+    };
+
+    const stopDragging = () => setIsDragging(false);
+
+    window.addEventListener('mousemove', handleDrag);
+    window.addEventListener('mouseup', stopDragging);
+
+    // Cleanup de eventos al desmontar el componente o al finalizar el drag
+    return () => {
+      window.removeEventListener('mousemove', handleDrag);
+      window.removeEventListener('mouseup', stopDragging);
+    };
+  }, [isDragging]); // Solo se ejecuta cuando `isDragging` cambia
+
+
   // Manejo de guardado (PUT)
   // Guardar cambios del proyecto (PUT)
   const handleSave = async () => {
@@ -66,7 +91,7 @@ const ProjectEdit = () => {
     }
   };
 
-  // Manejo del chat con IA (LLaMa) al enviar un mensaje
+  // Manejo del chat con IA al enviar un mensaje
   const handleSendChat = async (e) => {
     e.preventDefault();
     // Si el usuario no ha escrito nada, no hacer nada
@@ -108,36 +133,89 @@ const ProjectEdit = () => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '90vh' }}>
+    <div style={{ display: 'flex', height: '90vh', fontFamily: 'Roboto, sans-serif' }}>
       {/* SECCIÓN IZQUIERDA: Editor del Proyecto */}
-      <div style={{ flex: 1, borderRight: '1px solid #ccc', padding: '1rem' }}>
-        <h2>Editar Proyecto</h2>
-        {message && <p>{message}</p>}
+      <div style={{ flex: 1, borderRight: '1px solid #ccc', padding: '2rem' }}>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Editar Proyecto</h2>
+        {message && <p style={{ color: 'green', marginBottom: '1rem' }}>{message}</p>}
 
-        <div>
-          <label>Título:</label>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '.5rem' }}>Título:</label>
           <input
-            style={{ width: '100%', marginBottom: '1rem' }}
+            style={{
+              width: '100%',
+              padding: '0.5rem',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+              fontSize: '1rem',
+            }}
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
+
         <div>
-          <label>Contenido:</label>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '.5rem' }}>Contenido:</label>
           <textarea
-            style={{ width: '100%', height: '60vh' }}
+            style={{
+              width: '100%',
+              height: '60vh',
+              padding: '0.5rem',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+              fontSize: '1rem',
+              resize: 'none',
+            }}
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
         </div>
-        <button onClick={handleSave}>Guardar Cambios</button>
-        <button onClick={() => navigate('/projects')} style={{ marginLeft: '1rem' }}>
-          Volver a mis proyectos
-        </button>
+
+        <div style={{ marginTop: '1.5rem' }}>
+          <button
+            onClick={handleSave}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#007bff',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              marginRight: '1rem',
+            }}
+          >
+            Guardar Cambios
+          </button>
+          <button
+            onClick={() => navigate('/projects')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#6c757d',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+            }}
+          >
+            Volver a mis proyectos
+          </button>
+        </div>
       </div>
 
-      {/* SECCIÓN DERECHA: Chat con LLaMa */}
+      {/* DIVISOR (Draggable Splitter) */}
+      <div
+        style={{
+          width: '5px',
+          cursor: 'col-resize',
+          backgroundColor: '#ccc',
+        }}
+        onMouseDown={() => setIsDragging(true)} // Inicia el drag
+      ></div>
+
+      {/* SECCIÓN DERECHA: Chat */}
       <div style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column' }}>
         <h2>Chat con DeepSeek</h2>
 
