@@ -1,17 +1,28 @@
 // src/App.js
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import Landing from './pages/Landing';
 import Register from './pages/Register';
 import Login from './pages/Login';
-import Projects from './pages/Projects'; // <--- Importa el nuevo componente
+import Projects from './pages/Projects';
 import ProjectEdit from './pages/ProjectEdit';
 import './App.css';
 
-const App = () => {
+// Componente que maneja la lógica de renderizado del Header
+const AppContent = () => {
+  const location = useLocation();
+
+  // Define las rutas donde deseas ocultar el Header
+  const hideHeaderRoutes = ['/', '/login']; // Aquí, '/' corresponde a la ruta de Landing
+
+  // Determina si el Header debe ocultarse
+  const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
+
   return (
-    <Router>
-      <div className="container">
+    <div className="container">
+      {/* Renderiza el Header solo si no está en una ruta que lo oculte */}
+      {!shouldHideHeader && (
         <header className="navbar">
           <h1 className="logo">Novalis</h1>
           <nav>
@@ -28,29 +39,31 @@ const App = () => {
             </ul>
           </nav>
         </header>
+      )}
 
-        <main className="content">
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:id" element={<ProjectEdit />} />
-            <Route
-              path="/"
-              element={
-                <div className="hero">
-                  <h2>Bienvenido a Novalis.ai</h2>
-                  <p>Descubre y edita tus proyectos de forma sencilla.</p>
-                  <Link to="/register" className="cta-button">
-                    Comienza Ahora
-                  </Link>
-                </div>
-              }
-            />
-          </Routes>
-        </main>
-      </div>
+      <main className="content">
+        <Routes>
+          {/* Ruta para la página de Landing */}
+          <Route path="/" element={<Landing />} />
+
+          {/* Otras rutas */}
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/projects/:id" element={<ProjectEdit />} />
+
+          {/* Si deseas agregar una ruta de error 404 o redireccionamiento, puedes hacerlo aquí */}
+          {/* <Route path="*" element={<NotFound />} /> */}
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 };
