@@ -2,6 +2,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import '../assets/style/login.css';
+import logo from '../assets/imgs/logo.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -62,151 +64,76 @@ const Login = () => {
     }
   };
 
-  // Estilos en línea
-  const styles = {
-    pageContainer: {
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: '#000000', // Fondo negro
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#ffffff',
-      fontFamily: 'sans-serif',
-    },
-    card: {
-      backgroundColor: '#1A1A1A',
-      borderRadius: '8px',
-      padding: '2rem',
-      width: '350px',
-      display: 'flex',
-      flexDirection: 'column',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-    },
-    heading: {
-      fontSize: '1.25rem',
-      marginBottom: '1.5rem',
-      fontWeight: '500',
-      textAlign: 'center',
-    },
-    formGroup: {
-      marginBottom: '1rem',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    label: {
-      marginBottom: '0.25rem',
-      fontSize: '0.9rem',
-      color: '#cccccc',
-    },
-    input: {
-      padding: '0.75rem',
-      border: '1px solid #333333',
-      borderRadius: '4px',
-      backgroundColor: '#2c2c2c',
-      color: '#ffffff',
-      fontSize: '0.95rem',
-      outline: 'none',
-    },
-    submitButton: {
-      width: '100%',
-      padding: '0.75rem',
-      backgroundColor: '#ffffff',
-      color: '#000000',
-      border: 'none',
-      borderRadius: '4px',
-      fontSize: '1rem',
-      cursor: 'pointer',
-      marginTop: '1rem',
-    },
-    message: {
-      marginTop: '1rem',
-      color: '#ffcccc', // Rojo suave si hay error, ajústalo según gusto
-      textAlign: 'center',
-    },
-    infoMessage: {
-      marginTop: '1rem',
-      fontSize: '0.85rem',
-      color: '#aaaaaa',
-      textAlign: 'center',
-    },
-    musicButton: {
-      position: 'absolute',
-      top: '20px',
-      right: '20px',
-      backgroundColor: '#fff',
-      border: 'none',
-      borderRadius: '4px',
-      padding: '0.5rem 1rem',
-      cursor: 'pointer',
-      fontSize: '0.9rem',
-      color: '#000',
-    },
+  const handleRegClick = () => {
+    navigate('/register');
   };
 
   return (
-    <div style={styles.pageContainer}>
+    <div className="page-container">
 
       {/* Botón para controlar la música */}
-      <button
+      {/* <button
         onClick={handleMusicToggle}
-        style={styles.musicButton}
+        className="music-button"
         aria-label={isPlaying ? 'Pausar Música' : 'Reproducir Música'}
       >
         {isPlaying ? '🎵 Pausar Música' : '🎶 Reproducir Música'}
       </button>
 
       {/* Audio oculto en pantalla, con loop */}
-      <audio ref={audioRef} src="/landing_tune.mp3" loop />
+      {/* <audio ref={audioRef} src="/landing_tune.mp3" loop /> */} 
 
       {/* Tarjeta con el formulario de login */}
-      <div style={styles.card}>
-        <h2 style={styles.heading}>Inicio de Sesión</h2>
+      <div className="card">
+        <h2 className="heading">Inicio de Sesión</h2>
 
         <form onSubmit={handleLogin}>
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="email">
-              Email:
-            </label>
+                    <div className="form-group">
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={styles.input}
+              className="input"
+              placeholder="Email"
             />
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="password">
-              Contraseña:
-            </label>
+          <div className="form-group">
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={styles.input}
+              className="input"
+              placeholder="Contraseña"
             />
           </div>
 
-          <button type="submit" style={styles.submitButton}>
+          <button type="submit" className="submit-button">
             Iniciar Sesión
           </button>
         </form>
-
-        {message && <p style={styles.message}>{message}</p>}
+        <div className='textoabajo'>
+          <p >Don't have an account?</p>
+          <p className='registro' onClick={handleRegClick}>Register here</p>
+        </div>
+        {message && <p className="message">{message}</p>}
 
         {/* Opcional: mostrar un mensaje si el autoplay fue bloqueado */}
-        {autoPlayError && (
-          <p style={styles.infoMessage}>
+        {/* {autoPlayError && (
+          <p className="info-message">
             Por favor, haz clic en "Reproducir Música" para escuchar la música.
           </p>
-        )}
+        )} */}
       </div>
+      <img
+        src={logo}
+        alt="Logo" 
+        className="logosi" 
+      />
     </div>
   );
 };

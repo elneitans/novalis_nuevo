@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import '../assets/style/projects.css';
+import logo from '../assets/imgs/logo.png';
+
+
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -62,7 +66,7 @@ const Projects = () => {
       // Limpiar campos
       setTitle('');
       setContent('');
-      setMessage('Proyecto creado exitosamente');
+      navigate(`/projects/${response.data.id}`);
 
     } catch (error) {
       setMessage(error.response?.data?.detail || 'Error al crear proyecto');
@@ -72,15 +76,29 @@ const Projects = () => {
   const navigate = useNavigate();
 
   return (
-    <div>
-      <h2>Mis Proyectos</h2>
+    
+    
+    <div className="projects-container">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=docs_add_on" />
+      <p className='nombre'>blueflowers.</p>
 
-      {/* Mostrar mensajes si los hay */}
-      {message && <p>{message}</p>}
+      <div className='flexito'>
+        <h2 className="projects-title">Mis Proyectos</h2>
+        <img
+          src={logo}
+          alt="Logo" 
+          className="florcita2" 
+        />
+      </div>
+      
 
-      {/* Formulario para crear nuevo proyecto */}
-      <form onSubmit={handleCreateProject}>
-        <div>
+      {message && <p className="message">{message}</p>}
+      <div className='newpro' onClick={handleCreateProject}>
+        <span class="material-symbols-outlined">docs_add_on</span>
+        <h3 className='nuev'>Nuevo proyecto</h3>
+      </div>
+      {/* <form onSubmit={handleCreateProject} className="project-form">
+        <div className="form-group">
           <label>Título del proyecto:</label>
           <input
             type="text"
@@ -90,7 +108,7 @@ const Projects = () => {
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label>Contenido (opcional):</label>
           <textarea
             value={content}
@@ -98,16 +116,19 @@ const Projects = () => {
           />
         </div>
 
-        <button type="submit">Crear Proyecto</button>
-      </form>
+        <button type="submit" className="submit-button">Crear Proyecto</button>
+      </form> */}
 
-      {/* Lista de proyectos */}
-      <ul>
+      <ul className="projects-list">
         {projects.map((proj) => (
-          <li key={proj.id}>
-            <strong>{proj.title}</strong> - {proj.content}
-            {/* Botón o enlace para editar */}
-            <button onClick={() => navigate(`/projects/${proj.id}`)}>
+          <li key={proj.id} className="project-item">
+            <div>
+              <strong>{proj.title}</strong> - {proj.content}
+            </div>
+            <button 
+              onClick={() => navigate(`/projects/${proj.id}`)}
+              className="edit-button"
+            >
               Editar
             </button>
           </li>

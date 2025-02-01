@@ -22,24 +22,7 @@ const AppContent = () => {
   return (
     <div className="container">
       {/* Renderiza el Header solo si no está en una ruta que lo oculte */}
-      {!shouldHideHeader && (
-        <header className="navbar">
-          <h1 className="logo">Novalis</h1>
-          <nav>
-            <ul className="nav-links">
-              <li>
-                <Link to="/register">Registro</Link>
-              </li>
-              <li>
-                <Link to="/login">Inicio de Sesión</Link>
-              </li>
-              <li>
-                <Link to="/projects">Mis Proyectos</Link>
-              </li>
-            </ul>
-          </nav>
-        </header>
-      )}
+      
 
       <main className="content">
         <Routes>

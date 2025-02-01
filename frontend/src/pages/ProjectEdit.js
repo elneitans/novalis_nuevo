@@ -1,9 +1,13 @@
 // src/pages/ProjectEdit.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import axios from 'axios';         // Para la llamada a /llama/chat
+import '../assets/style/editpro.css';
+import logo from '../assets/imgs/logo.png';
+import foto from '../assets/imgs/fotoia.png';
+
 
 const ProjectEdit = () => {
   const { id } = useParams();  // ID del proyecto, tomado de la URL
@@ -15,6 +19,43 @@ const ProjectEdit = () => {
   const [message, setMessage] = useState('');
   const [leftWidth, setLeftWidth] = useState(300);
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSendChat = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMessage = {
+      role: 'user',
+      text: chatInput.trim(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setChatInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/deepseek/chat', {
+        prompt: userMessage.text,
+        max_length: 100,
+        do_sample: true,
+        temperature: 0.7,
+      });
+      
+      const assistantMessage = {
+        role: 'assistant',
+        text: response.data.content,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', text: 'Ocurrió un error al contactar la IA.' },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };  
 
   // States para el chat
   const [messages, setMessages] = useState([
@@ -23,8 +64,39 @@ const ProjectEdit = () => {
   ]);
   const [chatInput, setChatInput] = useState('');
 
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  // Create debounced save function
+  const debouncedSave = useCallback(
+    debounce(async (newTitle, newContent) => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        await api.put(
+          `/projects/${id}`,
+          { title: newTitle, content: newContent },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        // Clear message after 2 seconds
+        setTimeout(() => setMessage(''), 2000);
+      } catch (error) {
+        setMessage(error.response?.data?.detail || 'Error al guardar');
+      }
+    }, 1000), // Wait 1 second after last change before saving
+    [id]
+  );
+
   // Al montar, obtener datos del proyecto
   useEffect(() => {
+    
     const fetchProject = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -47,6 +119,12 @@ const ProjectEdit = () => {
 
     fetchProject();
   }, [id]);
+
+  useEffect(() => {
+    if (title || content) {
+      debouncedSave(title, content);
+    }
+  }, [title, content, debouncedSave]);
 
   useEffect(() => {
     // Cuando el usuario está arrastrando, conecta los eventos globales
@@ -92,168 +170,134 @@ const ProjectEdit = () => {
   };
 
   // Manejo del chat con IA al enviar un mensaje
-  const handleSendChat = async (e) => {
-    e.preventDefault();
-    // Si el usuario no ha escrito nada, no hacer nada
-    if (!chatInput.trim()) return;
+  // const handleSendChat = async (e) => {
+  //   e.preventDefault();
+  //   // Si el usuario no ha escrito nada, no hacer nada
+  //   if (!chatInput.trim()) return;
 
-    const userMessage = {
-      role: 'user',
-      text: chatInput.trim(),
-    };
+  //   const userMessage = {
+  //     role: 'user',
+  //     text: chatInput.trim(),
+  //   };
 
-    // Añadimos el mensaje del usuario al historial
-    setMessages((prev) => [...prev, userMessage]);
-    // Vaciamos el input
-    setChatInput('');
+  //   // Añadimos el mensaje del usuario al historial
+  //   setMessages((prev) => [...prev, userMessage]);
+  //   // Vaciamos el input
+  //   setChatInput('');
 
-    try {
-      // Llamada a nuestro endpoint local: POST /deepseek/chat
-      const response = await axios.post('http://127.0.0.1:8000/deepseek/chat', {
-        prompt: userMessage.text,
-        max_length: 100,
-        do_sample: true,
-        temperature: 0.7,
-      });
-      const assistantMessage = {
-        role: 'assistant',
-        text: response.data.content,
-      };
+  //   try {
+  //     // Llamada a nuestro endpoint local: POST /deepseek/chat
+  //     const response = await axios.post('http://127.0.0.1:8000/deepseek/chat', {
+  //       prompt: userMessage.text,
+  //       max_length: 100,
+  //       do_sample: true,
+  //       temperature: 0.7,
+  //     });
+  //     const assistantMessage = {
+  //       role: 'assistant',
+  //       text: response.data.content,
+  //     };
 
-      // Agregamos la respuesta del modelo al historial
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error llamando a LLaMa:', error);
-      // Opcional: Mostrar un mensaje de error en la interfaz
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', text: 'Ocurrió un error al contactar la IA.' },
-      ]);
-    }
-  };
+  //     // Agregamos la respuesta del modelo al historial
+  //     setMessages((prev) => [...prev, assistantMessage]);
+  //   } catch (error) {
+  //     console.error('Error llamando a LLaMa:', error);
+  //     // Opcional: Mostrar un mensaje de error en la interfaz
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       { role: 'assistant', text: 'Ocurrió un error al contactar la IA.' },
+  //     ]);
+  //   }
+  // };
+  
 
   return (
-    <div style={{ display: 'flex', height: '90vh', fontFamily: 'Roboto, sans-serif' }}>
+    <div className="containera">
       {/* SECCIÓN IZQUIERDA: Editor del Proyecto */}
-      <div style={{ flex: 1, borderRight: '1px solid #ccc', padding: '2rem' }}>
-        <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Editar Proyecto</h2>
-        {message && <p style={{ color: 'green', marginBottom: '1rem' }}>{message}</p>}
+      <div className="left-section" style={{ width: leftWidth }}>
+        {message && <p className="message">{message}</p>}
 
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '.5rem' }}>Título:</label>
+        <div className="form-group titulogo">
           <input
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              fontSize: '1rem',
-            }}
+            className="input borderless coso"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Escribe tu título aquí."
+          />
+          <img
+            src={logo}
+            alt="Logo" 
+            className="florcita" 
           />
         </div>
 
-        <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '.5rem' }}>Contenido:</label>
+        <div className="form-group">
           <textarea
-            style={{
-              width: '100%',
-              height: '60vh',
-              padding: '0.5rem',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              fontSize: '1rem',
-              resize: 'none',
-            }}
+            className="textareaa input borderless"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            placeholder="Comienza a dejar fluir tu creatividad aquí."
           />
         </div>
 
-        <div style={{ marginTop: '1.5rem' }}>
-          <button
-            onClick={handleSave}
-            style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#007bff',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              marginRight: '1rem',
-            }}
-          >
-            Guardar Cambios
-          </button>
-          <button
-            onClick={() => navigate('/projects')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#6c757d',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
-            Volver a mis proyectos
-          </button>
-        </div>
       </div>
 
       {/* DIVISOR (Draggable Splitter) */}
       <div
-        style={{
-          width: '5px',
-          cursor: 'col-resize',
-          backgroundColor: '#ccc',
-        }}
+        className="splitter"
         onMouseDown={() => setIsDragging(true)} // Inicia el drag
       ></div>
 
       {/* SECCIÓN DERECHA: Chat */}
-      <div style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column' }}>
-        <h2>Chat con DeepSeek</h2>
+      <div className="right-section">
 
         {/* HISTORIAL DE MENSAJES */}
-        <div
-          style={{
-            flex: 1,
-            border: '1px solid #ccc',
-            padding: '1rem',
-            overflowY: 'auto',
-            marginBottom: '1rem',
-          }}
-        >
+        <div className="chat-history">
           {messages.map((msg, i) => (
-            <div key={i} style={{ marginBottom: '1rem' }}>
-              <strong>
-                {msg.role === 'user'
-                  ? 'Tú'
-                  : msg.role === 'assistant'
-                  ? 'Deepseek'
-                  : 'Sistema'}
-                :
-              </strong>{' '}
-              {msg.text}
+            <div 
+              key={i} 
+              className={`message-wrapper ${msg.role}`}
+            >
+              {msg.role !== 'user' && (
+                <img 
+                  src={foto} 
+                  alt="Assistant" 
+                  className="profile-pic"
+                />
+              )}
+              <div className={`chat-message ${msg.role}`}>
+                {msg.text}
+              </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="message-wrapper assistant">
+              <img src={foto} alt="Assistant" className="profile-pic" />
+              <div className="chat-message assistant loading">
+                <div className="typing-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* FORMULARIO PARA ENVIAR UN NUEVO MENSAJE */}
-        <form onSubmit={handleSendChat} style={{ display: 'flex', alignItems: 'center' }}>
-          <input
+        <form onSubmit={handleSendChat} className="chat-form">
+          <textarea
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             placeholder="Escribe tu mensaje..."
-            style={{ flex: 1, marginRight: '1rem' }}
+            className="chat-input"
+            rows='2'
           />
-          <button type="submit">Enviar</button>
+          <button type="submit" className="send-button">
+            ⬆
+          </button>
         </form>
       </div>
     </div>

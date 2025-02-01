@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Belleza&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&display=swap');
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    background: url("../imgs/fondoland.png") center center;
+    background-repeat: repeat-y;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+  }
+  
+.logo {
+    cursor: pointer;
+    padding-top: 10px;
+    max-width: 100px; 
+    width: 100%;
+    height: auto;
+}
+
+.logo:hover {
+    filter: brightness(1.051) saturate(150%) drop-shadow(0px 4px 15px rgba(0, 0, 0, 0.5));
+}
+
+.ambos{
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.nombre {
+    text-align: left;
+    font-family: 'Belleza', regular;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    padding-top: 75px;
+    margin-top: 0px;
+    width: 879px;
+    height: 100px;
+    flex-shrink: 0;
+}
+
+.parrafo{
+    text-align: left;
+    color: #1A1A1A;
+    font-family: "EB Garamond";
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 879px;
+    height: 174px;
+    flex-shrink: 0;
+}
