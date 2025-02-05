@@ -4,14 +4,19 @@ import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from openai import OpenAI
+from typing import List
 
 router = APIRouter(
     prefix="/deepseek",
     tags=["deepseek"]
 )
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
 class ChatRequest(BaseModel):
-    prompt: str
+    messages: List[ChatMessage]  # Se espera el historial completo de la conversación
 
 class ChatResponse(BaseModel):
     content: str
@@ -19,34 +24,45 @@ class ChatResponse(BaseModel):
 @router.post("/chat", response_model=ChatResponse)
 def chat_with_deepseek(payload: ChatRequest):
     """
-    Envía el `prompt` a la API de DeepSeek y retorna la respuesta del modelo.
+    Envía la conversación completa a la API de DeepSeek y retorna la respuesta del modelo.
     """
     try:
-        # 1. Cargamos la API key desde variable de entorno o config
+        # 1. Cargamos la API key desde variable de entorno
         api_key = os.getenv("DEEPSEEK_API_KEY")
         if not api_key:
             raise HTTPException(status_code=500, detail="Falta la DeepSeek API Key")
 
-        # 2. Inicializamos el cliente
+        # 2. Inicializamos el cliente de la API de DeepSeek
         client = OpenAI(
             api_key=api_key,
             base_url="https://api.deepseek.com"
         )
 
-        # 3. Construimos el mensaje
-        messages = [
-            {"role": "system", "content": "Eres un mentor literario con alma de poeta. Procura que tus respuestas sean humanas, no estructuradas. Intentas mantener una conversación con el usuario por lo que le puedes hacer preguntas, citarle poetas: quieres desbloquear su creatividad, escribir poesía bellísima."},
-            {"role": "user", "content": payload.prompt},
-        ]
+        # 3. Convertimos los mensajes (modelos de Pydantic) a diccionarios
+        conversation = [msg.dict() for msg in payload.messages]
 
-        # 4. Llamamos a la API
+        # 4. Verificamos si ya se ha incluido un mensaje del sistema; de lo contrario, lo agregamos al inicio.
+        if not conversation or conversation[0].get("role") != "system":
+            system_message = {
+                "role": "system",
+                "content": (
+                    "Eres un mentor literario. Procura que tus respuestas sean humanas, "
+                    "no estructuradas, no excesivamente literarias ya que el autor es el usuario. "
+                    "Intenta mantener una conversación con el usuario, por lo que le puedes "
+                    "hacer preguntas, citarle trozos de poemas: quieres desbloquear su creatividad."
+                    "SÉ BREVE. SÉ BREVE. SÉ BREVE." 
+                )
+            }
+            conversation.insert(0, system_message)
+
+        # 5. Llamamos a la API enviando el historial completo
         response = client.chat.completions.create(
             model="deepseek-chat",
-            messages=messages,
+            messages=conversation,
             stream=False
         )
 
-        # 5. Extraemos la respuesta
+        # 6. Extraemos la respuesta del asistente
         content = response.choices[0].message.content
         return ChatResponse(content=content)
 

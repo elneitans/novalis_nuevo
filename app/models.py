@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, text
 from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
 from .database import Base
 
 class User(Base):
@@ -19,5 +20,9 @@ class Project(Base):
     title = Column(String, index=True)
     content = Column(String, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
+    updated_at = Column("updated_at", DateTime,
+                       default=datetime.now(timezone.utc),
+                       onupdate=datetime.now(timezone.utc),
+                       server_default=text("now()"))
 
     owner = relationship("User", back_populates="projects")

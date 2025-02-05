@@ -1,0 +1,42 @@
+.containera {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Panel izquierdo (editor) */
+.left-section {
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* Panel derecho (chat) */
+.right-section {
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* División entre paneles */
+.divider {
+  width: 40px; /* Ajusta este valor según tus necesidades */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+/* Botón de toggle sin estilos de borde ni fondo */
+.toggle-chat-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  font-size: 24px; /* Tamaño del triángulo */
+}
+
+/* Opcional: para mejorar la apariencia del triángulo */
+.triangle {
+  display: inline-block;
+  transition: transform 0.3s;
+}

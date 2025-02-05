@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 from .. import models, schemas
 from ..database import SessionLocal
 from ..utils import get_current_user
@@ -31,7 +32,8 @@ def create_project(
     new_project = models.Project(
         title=project_create.title,
         content=project_create.content,
-        owner_id=current_user.id
+        owner_id=current_user.id,
+        updated_at=datetime.now(timezone.utc)
     )
     db.add(new_project)
     db.commit()

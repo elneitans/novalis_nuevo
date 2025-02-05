@@ -1,7 +1,8 @@
 # app/schemas.py
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
+from datetime import datetime
 
 class ProjectBase(BaseModel):
     title: str
@@ -13,6 +14,7 @@ class ProjectCreate(ProjectBase):
 class Project(ProjectBase):
     id: int
     owner_id: int
+    updated_at: datetime
 
     class Config:
         orm_mode = True
